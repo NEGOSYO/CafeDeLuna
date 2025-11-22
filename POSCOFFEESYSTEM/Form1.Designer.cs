@@ -133,7 +133,7 @@ namespace POSCOFFEESYSTEM
             this.richTextBoxOrderSummary.Size = new System.Drawing.Size(279, 375);
             this.richTextBoxOrderSummary.TabIndex = 0;
             this.richTextBoxOrderSummary.Text = "";
-            
+            this.richTextBoxOrderSummary.TextChanged += new System.EventHandler(this.richTextBoxOrderSummary_TextChanged);
             // 
             // panel1
             // 
@@ -183,7 +183,6 @@ namespace POSCOFFEESYSTEM
             this.addtocart9.TabIndex = 9;
             this.addtocart9.Text = "Add to Cart";
             this.addtocart9.UseVisualStyleBackColor = false;
-            
             // 
             // price9
             // 
@@ -235,7 +234,6 @@ namespace POSCOFFEESYSTEM
             this.addtocart8.TabIndex = 8;
             this.addtocart8.Text = "Add to Cart";
             this.addtocart8.UseVisualStyleBackColor = false;
-            
             // 
             // price8
             // 
@@ -287,7 +285,6 @@ namespace POSCOFFEESYSTEM
             this.addtocart7.TabIndex = 7;
             this.addtocart7.Text = "Add to Cart";
             this.addtocart7.UseVisualStyleBackColor = false;
-           
             // 
             // price7
             // 
@@ -339,7 +336,6 @@ namespace POSCOFFEESYSTEM
             this.addtocart6.TabIndex = 6;
             this.addtocart6.Text = "Add to Cart";
             this.addtocart6.UseVisualStyleBackColor = false;
-            
             // 
             // price6
             // 
@@ -391,7 +387,6 @@ namespace POSCOFFEESYSTEM
             this.addtocart5.TabIndex = 5;
             this.addtocart5.Text = "Add to Cart";
             this.addtocart5.UseVisualStyleBackColor = false;
-       
             // 
             // price5
             // 
@@ -443,7 +438,6 @@ namespace POSCOFFEESYSTEM
             this.addtocart4.TabIndex = 4;
             this.addtocart4.Text = "Add to Cart";
             this.addtocart4.UseVisualStyleBackColor = false;
-           
             // 
             // price4
             // 
@@ -495,7 +489,6 @@ namespace POSCOFFEESYSTEM
             this.addtocart3.TabIndex = 5;
             this.addtocart3.Text = "Add to Cart";
             this.addtocart3.UseVisualStyleBackColor = false;
-            
             // 
             // price3
             // 
@@ -547,7 +540,6 @@ namespace POSCOFFEESYSTEM
             this.addtocart2.TabIndex = 4;
             this.addtocart2.Text = "Add to Cart";
             this.addtocart2.UseVisualStyleBackColor = false;
-            
             // 
             // price2
             // 
@@ -599,7 +591,6 @@ namespace POSCOFFEESYSTEM
             this.addtocart1.TabIndex = 3;
             this.addtocart1.Text = "Add to Cart";
             this.addtocart1.UseVisualStyleBackColor = false;
-
             // 
             // price1
             // 
@@ -647,11 +638,12 @@ namespace POSCOFFEESYSTEM
             this.label12.BackColor = System.Drawing.Color.Transparent;
             this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label12.ForeColor = System.Drawing.Color.Black;
-            this.label12.Location = new System.Drawing.Point(56, 569);
+            this.label12.Location = new System.Drawing.Point(72, 561);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(54, 20);
             this.label12.TabIndex = 3;
             this.label12.Text = "Total:";
+            this.label12.Click += new System.EventHandler(this.label12_Click);
             // 
             // label13
             // 
@@ -659,11 +651,12 @@ namespace POSCOFFEESYSTEM
             this.label13.BackColor = System.Drawing.Color.Transparent;
             this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label13.ForeColor = System.Drawing.Color.Black;
-            this.label13.Location = new System.Drawing.Point(52, 603);
+            this.label13.Location = new System.Drawing.Point(8, 596);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(116, 20);
             this.label13.TabIndex = 4;
             this.label13.Text = "Amount Paid:";
+            this.label13.Click += new System.EventHandler(this.label13_Click);
             // 
             // label14
             // 
@@ -671,7 +664,7 @@ namespace POSCOFFEESYSTEM
             this.label14.BackColor = System.Drawing.Color.Transparent;
             this.label14.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label14.ForeColor = System.Drawing.Color.Black;
-            this.label14.Location = new System.Drawing.Point(52, 640);
+            this.label14.Location = new System.Drawing.Point(48, 630);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(76, 20);
             this.label14.TabIndex = 5;
@@ -680,7 +673,7 @@ namespace POSCOFFEESYSTEM
             // lblTotal
             // 
             this.lblTotal.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(235)))), ((int)(((byte)(227)))), ((int)(((byte)(213)))));
-            this.lblTotal.Location = new System.Drawing.Point(158, 563);
+            this.lblTotal.Location = new System.Drawing.Point(132, 552);
             this.lblTotal.Name = "lblTotal";
             this.lblTotal.Size = new System.Drawing.Size(100, 29);
             this.lblTotal.TabIndex = 7;
@@ -689,26 +682,25 @@ namespace POSCOFFEESYSTEM
             // change
             // 
             this.change.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(235)))), ((int)(((byte)(227)))), ((int)(((byte)(213)))));
-            this.change.Location = new System.Drawing.Point(142, 640);
+            this.change.Location = new System.Drawing.Point(127, 625);
             this.change.Name = "change";
-            this.change.Size = new System.Drawing.Size(100, 29);
+            this.change.Size = new System.Drawing.Size(105, 29);
             this.change.TabIndex = 9;
             // 
             // calculate
             // 
             this.calculate.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(163)))), ((int)(((byte)(152)))));
             this.calculate.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.calculate.Location = new System.Drawing.Point(312, 596);
+            this.calculate.Location = new System.Drawing.Point(263, 544);
             this.calculate.Name = "calculate";
-            this.calculate.Size = new System.Drawing.Size(92, 37);
+            this.calculate.Size = new System.Drawing.Size(138, 37);
             this.calculate.TabIndex = 12;
             this.calculate.Text = "Calculate";
             this.calculate.UseVisualStyleBackColor = false;
-   
             // 
             // txtAmountPaid
             // 
-            this.txtAmountPaid.Location = new System.Drawing.Point(200, 603);
+            this.txtAmountPaid.Location = new System.Drawing.Point(130, 596);
             this.txtAmountPaid.Name = "txtAmountPaid";
             this.txtAmountPaid.Size = new System.Drawing.Size(97, 20);
             this.txtAmountPaid.TabIndex = 13;
@@ -717,13 +709,12 @@ namespace POSCOFFEESYSTEM
             // 
             this.generatereceipt.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(163)))), ((int)(((byte)(152)))));
             this.generatereceipt.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.generatereceipt.Location = new System.Drawing.Point(419, 640);
+            this.generatereceipt.Location = new System.Drawing.Point(263, 613);
             this.generatereceipt.Name = "generatereceipt";
             this.generatereceipt.Size = new System.Drawing.Size(138, 37);
             this.generatereceipt.TabIndex = 14;
             this.generatereceipt.Text = "Generate Receipt";
             this.generatereceipt.UseVisualStyleBackColor = false;
-        
             // 
             // label2
             // 
@@ -741,7 +732,6 @@ namespace POSCOFFEESYSTEM
             this.txtCustomerName.Name = "txtCustomerName";
             this.txtCustomerName.Size = new System.Drawing.Size(165, 20);
             this.txtCustomerName.TabIndex = 16;
-     
             // 
             // label3
             // 
@@ -781,19 +771,17 @@ namespace POSCOFFEESYSTEM
             this.MDshbtn1.TabIndex = 20;
             this.MDshbtn1.Text = "Main Dashboards";
             this.MDshbtn1.UseVisualStyleBackColor = false;
-      
             // 
             // Paybtn
             // 
             this.Paybtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(163)))), ((int)(((byte)(152)))));
             this.Paybtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Paybtn.Location = new System.Drawing.Point(266, 639);
+            this.Paybtn.Location = new System.Drawing.Point(263, 579);
             this.Paybtn.Name = "Paybtn";
             this.Paybtn.Size = new System.Drawing.Size(138, 37);
             this.Paybtn.TabIndex = 21;
             this.Paybtn.Text = "Pay";
             this.Paybtn.UseVisualStyleBackColor = false;
-          
             // 
             // Form1
             // 
@@ -821,7 +809,7 @@ namespace POSCOFFEESYSTEM
             this.Controls.Add(this.richTextBoxOrderSummary);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
-            this.Text = "Cafe de luna";
+            this.Text = "Shop";
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.groupBox9.ResumeLayout(false);

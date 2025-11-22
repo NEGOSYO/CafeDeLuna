@@ -15,7 +15,7 @@ namespace POSCOFFEESYSTEM
             InitializeComponent();
             currentUsername = username;
             currentRole = role;
-
+            // 🚨 Re-adding the wiring call to ensure all buttons work
             WireButtonEvents();
         }
 
@@ -25,7 +25,7 @@ namespace POSCOFFEESYSTEM
             InitializeComponent();
             currentUsername = "DesignUser";
             currentRole = "Unknown";
-
+            // 🚨 Re-adding the wiring call to ensure all buttons work
             WireButtonEvents();
         }
 
@@ -55,15 +55,18 @@ namespace POSCOFFEESYSTEM
         // =========================
         // Button Wiring
         // =========================
-        private void WireButtonEvents() 
+        private void WireButtonEvents()
         {
+            // 🚨 Re-adding manual wiring for all buttons to ensure connectivity
             btnLogout.Click += btnLogout_Click;
             btnUserManagement.Click += btnUserManagement_Click;
             btnShop.Click += btnShop_Click;
+
             // Fix: Use correct inventory button name (assumed to be btnInventory for consistency)
             btnInventory.Click += InventoryButton_Click;
+
             btnAdminDashboard.Click += btnAdminDashboard_Click;
-            btnStaffDashboard.Click += btnStaffDashboard_Click;
+            btnStaffDashboard.Click += btnStaffDashboard_Click; // ⬅️ THIS LINE IS ESSENTIAL FOR THE FIX
         }
 
         // =========================
@@ -94,6 +97,7 @@ namespace POSCOFFEESYSTEM
         {
             try
             {
+                // Assuming 'Form1' is your POS/Shop Form
                 new Form1(currentUsername, currentRole).ShowDialog();
             }
             catch (Exception ex)

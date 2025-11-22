@@ -7,12 +7,13 @@ namespace POSCOFFEESYSTEM
 {
     public partial class InventoryForm : Form
     {
-        string connectionString = @"Server=DESKTOP-F6NJNVH\SQLEXPRESS;Database=CafeDB;Trusted_Connection=True;";
+        string connectionString = @"Server=(localdb)\MSSQLLocalDB;Database=CafeDB;Trusted_Connection=True;";
 
         public InventoryForm()
         {
             InitializeComponent();
             LoadProducts();
+            LoadCategoryCombo();
             LoadCategoryFilter();
 
             ProductList.CellClick += ProductList_CellClick;
@@ -29,20 +30,42 @@ namespace POSCOFFEESYSTEM
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 con.Open();
-                SqlDataAdapter da = new SqlDataAdapter("SELECT * FROM Products", con);
+                SqlDataAdapter da = new SqlDataAdapter(
+                    @"SELECT P.ProductID, P.ProductName, P.Price, P.Quantity,
+                             C.CategoryID, C.CategoryName
+                      FROM Products P
+                      LEFT JOIN Categories C ON P.CategoryID = C.CategoryID",
+                    con);
+
                 DataTable dt = new DataTable();
                 da.Fill(dt);
                 ProductList.DataSource = dt;
             }
         }
 
-        // LOAD CATEGORIES
+        // LOAD CATEGORIES INTO COMBOBOX
+        private void LoadCategoryCombo()
+        {
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                con.Open();
+                SqlDataAdapter da = new SqlDataAdapter("SELECT * FROM Categories", con);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                cmbCategory.DataSource = dt;
+                cmbCategory.DisplayMember = "CategoryName";
+                cmbCategory.ValueMember = "CategoryID";
+            }
+        }
+
+        // LOAD CATEGORIES FOR FILTER DROPDOWN
         private void LoadCategoryFilter()
         {
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 con.Open();
-                SqlDataAdapter da = new SqlDataAdapter("SELECT DISTINCT Category FROM Products", con);
+                SqlDataAdapter da = new SqlDataAdapter("SELECT * FROM Categories", con);
                 DataTable dt = new DataTable();
                 da.Fill(dt);
 
@@ -50,7 +73,7 @@ namespace POSCOFFEESYSTEM
                 ctegoryFilter.Items.Add("All");
 
                 foreach (DataRow row in dt.Rows)
-                    ctegoryFilter.Items.Add(row["Category"].ToString());
+                    ctegoryFilter.Items.Add(row["CategoryName"].ToString());
 
                 ctegoryFilter.SelectedIndex = 0;
             }
@@ -63,19 +86,19 @@ namespace POSCOFFEESYSTEM
             {
                 con.Open();
                 SqlCommand cmd = new SqlCommand(
-                    "INSERT INTO Products (ProductName, Category, Price, Quantity) VALUES (@n, @c, @p, @q)", con);
+                    "INSERT INTO Products (ProductName, CategoryID, Price, Quantity, DateAdded) VALUES (@n, @cid, @p, @q, @d)", con);
 
                 cmd.Parameters.AddWithValue("@n", txtName.Text);
-                cmd.Parameters.AddWithValue("@c", txtCategory.Text);
+                cmd.Parameters.AddWithValue("@cid", cmbCategory.SelectedValue);
                 cmd.Parameters.AddWithValue("@p", decimal.Parse(txtPrice.Text));
                 cmd.Parameters.AddWithValue("@q", int.Parse(txtQuantity.Text));
+                cmd.Parameters.AddWithValue("@d", DateTime.Now);
 
                 cmd.ExecuteNonQuery();
             }
 
             MessageBox.Show("Product Added!");
             LoadProducts();
-            LoadCategoryFilter();
         }
 
         // CLICK ROW
@@ -85,29 +108,34 @@ namespace POSCOFFEESYSTEM
             {
                 txtID.Text = ProductList.Rows[e.RowIndex].Cells["ProductID"].Value.ToString();
                 txtName.Text = ProductList.Rows[e.RowIndex].Cells["ProductName"].Value.ToString();
-                txtCategory.Text = ProductList.Rows[e.RowIndex].Cells["Category"].Value.ToString();
                 txtPrice.Text = ProductList.Rows[e.RowIndex].Cells["Price"].Value.ToString();
                 txtQuantity.Text = ProductList.Rows[e.RowIndex].Cells["Quantity"].Value.ToString();
+
+                // Set ComboBox using CategoryID
+                cmbCategory.SelectedValue = ProductList.Rows[e.RowIndex].Cells["CategoryID"].Value;
             }
         }
 
         // UPDATE PRODUCT
         private void Editbtn_Click(object sender, EventArgs e)
         {
+            if (!int.TryParse(txtID.Text, out int productId))
+            {
+                MessageBox.Show("Please select a product first!");
+                return;
+            }
+
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 con.Open();
                 SqlCommand cmd = new SqlCommand(
-                    "UPDATE Products SET ProductName=@n, Category=@c, Price=@p, Quantity=@q WHERE ProductID=@id", con);
+                    @"UPDATE Products 
+                      SET ProductName=@n, CategoryID=@cid, Price=@p, Quantity=@q 
+                      WHERE ProductID=@id", con);
 
-                if (!int.TryParse(txtID.Text, out int productId))
-                {
-                    MessageBox.Show("Please select a valid product to edit.");
-                    return;
-                }
                 cmd.Parameters.AddWithValue("@id", productId);
                 cmd.Parameters.AddWithValue("@n", txtName.Text);
-                cmd.Parameters.AddWithValue("@c", txtCategory.Text);
+                cmd.Parameters.AddWithValue("@cid", cmbCategory.SelectedValue);
                 cmd.Parameters.AddWithValue("@p", decimal.Parse(txtPrice.Text));
                 cmd.Parameters.AddWithValue("@q", int.Parse(txtQuantity.Text));
 
@@ -121,27 +149,36 @@ namespace POSCOFFEESYSTEM
         // DELETE PRODUCT
         private void Deletebtn_Click(object sender, EventArgs e)
         {
+            if (!int.TryParse(txtID.Text, out int productId))
+            {
+                MessageBox.Show("Select a product first!");
+                return;
+            }
+
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 con.Open();
                 SqlCommand cmd = new SqlCommand("DELETE FROM Products WHERE ProductID=@id", con);
-                cmd.Parameters.AddWithValue("@id", int.Parse(txtID.Text));
+                cmd.Parameters.AddWithValue("@id", productId);
                 cmd.ExecuteNonQuery();
             }
 
             MessageBox.Show("Product Deleted!");
             LoadProducts();
-            LoadCategoryFilter();
         }
 
-        // SEARCH
+        // SEARCH BY PRODUCT NAME
         private void Searchbtn_Click(object sender, EventArgs e)
         {
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 con.Open();
                 SqlDataAdapter da = new SqlDataAdapter(
-                    "SELECT * FROM Products WHERE ProductName LIKE @s", con);
+                    @"SELECT P.ProductID, P.ProductName, P.Price, P.Quantity,
+                             C.CategoryID, C.CategoryName
+                      FROM Products P
+                      JOIN Categories C ON P.CategoryID = C.CategoryID
+                      WHERE P.ProductName LIKE @s", con);
 
                 da.SelectCommand.Parameters.AddWithValue("@s", "%" + txtSearch.Text + "%");
 
@@ -151,7 +188,7 @@ namespace POSCOFFEESYSTEM
             }
         }
 
-        // CATEGORY FILTER
+        // FILTER BY CATEGORY
         private void ctegoryFilter_SelectedIndexChanged(object sender, EventArgs e)
         {
             string selected = ctegoryFilter.SelectedItem.ToString();
@@ -159,9 +196,17 @@ namespace POSCOFFEESYSTEM
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 con.Open();
+
                 string query = selected == "All"
-                    ? "SELECT * FROM Products"
-                    : "SELECT * FROM Products WHERE Category=@c";
+                    ? @"SELECT P.ProductID, P.ProductName, P.Price, P.Quantity,
+                               C.CategoryID, C.CategoryName
+                        FROM Products P
+                        JOIN Categories C ON P.CategoryID = C.CategoryID"
+                    : @"SELECT P.ProductID, P.ProductName, P.Price, P.Quantity,
+                               C.CategoryID, C.CategoryName
+                        FROM Products P
+                        JOIN Categories C ON P.CategoryID = C.CategoryID
+                        WHERE C.CategoryName=@c";
 
                 SqlDataAdapter da = new SqlDataAdapter(query, con);
 

@@ -21,6 +21,9 @@ namespace POSCOFFEESYSTEM
             // Ensure DataGridView allows full row select
             dataGridViewRecentTransactions.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dataGridViewRecentTransactions.MultiSelect = false;
+
+            // Note: The SelectionChanged event handler is no longer needed 
+            // since product details are now loaded with the main transaction list.
         }
 
         private void AdminDashboardForm_Load(object sender, EventArgs e)
@@ -29,7 +32,7 @@ namespace POSCOFFEESYSTEM
         }
 
         // ==========================
-        // LOAD DASHBOARD DATA
+        // LOAD DASHBOARD DATA (MODIFIED TO INCLUDE PRODUCTS)
         // ==========================
         private void LoadDashboardData(string searchFilter = "")
         {
@@ -49,39 +52,50 @@ namespace POSCOFFEESYSTEM
                     lblLowStock.Text = cmdLowStock.ExecuteScalar()?.ToString() ?? "0";
 
                 // Total Transactions
-                using (SqlCommand cmdTransactions = new SqlCommand("SELECT COUNT(*) FROM Transactions", con))
+                // Uses COUNT(DISTINCT) because the JOIN will duplicate transaction rows
+                using (SqlCommand cmdTransactions = new SqlCommand("SELECT COUNT(DISTINCT [TransactionID]) FROM Transactions", con))
                     lblTotalTransaction.Text = cmdTransactions.ExecuteScalar()?.ToString() ?? "0";
 
-                // Total Sales
+                // Total Sales (Remains based on Transactions table for overall total)
                 using (SqlCommand cmdSales = new SqlCommand("SELECT SUM(TotalAmount) FROM Transactions", con))
                 {
                     object result = cmdSales.ExecuteScalar();
-                    decimal totalSales = (result != DBNull.Value) ? Convert.ToDecimal(result) : 0;
+                    decimal totalSales = (result != DBNull.Value && result != null) ? Convert.ToDecimal(result) : 0;
                     lblTotalSales.Text = $"₱{totalSales:N2}";
                 }
 
-                // Recent Transactions with Search Filter
+                // 🚨 MODIFIED QUERY: Uses JOINs to combine transaction header with product details
                 string queryRecent = @"
-                    SELECT TOP 10
-                        TransactionID,
-                        Customer,
-                        Date,
-                        TotalAmount,
-                        PaymentMethod
-                    FROM Transactions
+                    SELECT TOP 20
+                        T.[TransactionID],
+                        T.Customer,
+                        T.[Date],
+                        T.TotalAmount,
+                        T.PaymentMethod,
+                        P.ProductName,       -- ⬅️ NEW: Product Name
+                        TD.Quantity,         -- ⬅️ NEW: Quantity Bought
+                        TD.Price AS ItemPrice -- ⬅️ NEW: Price of the item in that transaction
+                    FROM 
+                        dbo.Transactions T
+                    INNER JOIN
+                        dbo.TransactionDetails TD ON T.[TransactionID] = TD.TransactionID
+                    INNER JOIN
+                        dbo.Products P ON TD.ProductID = P.ProductID
                 ";
 
                 if (!string.IsNullOrEmpty(searchFilter))
                 {
                     queryRecent += @"
                         WHERE 
-                            Customer LIKE @filter OR
-                            PaymentMethod LIKE @filter OR
-                            CAST(TransactionID AS NVARCHAR) LIKE @filter
+                            T.Customer LIKE @filter OR
+                            T.PaymentMethod LIKE @filter OR
+                            P.ProductName LIKE @filter OR -- Allows searching by product name
+                            CAST(T.[TransactionID] AS NVARCHAR) LIKE @filter
                     ";
                 }
 
-                queryRecent += " ORDER BY Date DESC";
+                // Order by date and then by TransactionID to group all products for one transaction together
+                queryRecent += " ORDER BY T.[Date] DESC, T.[TransactionID], P.ProductName";
 
                 using (SqlCommand cmd = new SqlCommand(queryRecent, con))
                 {
@@ -144,10 +158,12 @@ namespace POSCOFFEESYSTEM
                 return;
             }
 
+            // IMPORTANT: Since the DataGridView has multiple rows for one transaction,
+            // we must ensure we get the ID from the selected row, which should be consistent.
             int id = Convert.ToInt32(dataGridViewRecentTransactions.SelectedRows[0].Cells["TransactionID"].Value);
 
             DialogResult confirm = MessageBox.Show(
-                $"Delete Transaction ID: {id}?",
+                $"Delete Transaction ID: {id} and all associated details?",
                 "Confirm Delete",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Warning);
@@ -160,11 +176,21 @@ namespace POSCOFFEESYSTEM
                 using (SqlConnection con = db.GetConnection())
                 {
                     con.Open();
-                    using (SqlCommand cmd = new SqlCommand(
+
+                    // 🚨 MODIFIED: Delete line items first due to foreign key constraints
+                    using (SqlCommand cmdDetail = new SqlCommand(
+                        "DELETE FROM TransactionDetails WHERE TransactionID = @id", con))
+                    {
+                        cmdDetail.Parameters.AddWithValue("@id", id);
+                        cmdDetail.ExecuteNonQuery();
+                    }
+
+                    // Now delete the master transaction record
+                    using (SqlCommand cmdMaster = new SqlCommand(
                         "DELETE FROM Transactions WHERE TransactionID = @id", con))
                     {
-                        cmd.Parameters.AddWithValue("@id", id);
-                        cmd.ExecuteNonQuery();
+                        cmdMaster.Parameters.AddWithValue("@id", id);
+                        cmdMaster.ExecuteNonQuery();
                     }
                 }
 

@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using System.Data.SqlClient;
 
 namespace POSCOFFEESYSTEM
 {
@@ -28,8 +29,9 @@ namespace POSCOFFEESYSTEM
 
         private List<(string item, decimal price, int qty)> cart = new List<(string, decimal, int)>();
 
-        private string connectionString = @"Server=DESKTOP-F6NJNVH\SQLEXPRESS;Database=CafeDB;Trusted_Connection=True;";
 
+        // private string connectionString = @"Server=DESKTOP-F6NJNVH\SQLEXPRESS;Database=CafeDB;Trusted_Connection=True;";
+        private string connectionString = @"Server=(localdb)\MSSQLLocalDB;Database=CafeDB;Trusted_Connection=True;";
         public Form1()
         {
             InitializeComponent();
@@ -180,43 +182,91 @@ namespace POSCOFFEESYSTEM
 
             decimal totalAmount = cart.Sum(i => i.price * i.qty);
             string customerName = txtCustomerName.Text.Trim();
-            string paymentMethod = "Cash"; // or use a dropdown if you have multiple methods
+            string paymentMethod = "Cash";
+            int newTransactionId = -1; // Variable to hold the new TransactionID
 
-            // Insert into Transactions table WITHOUT UserID
+            // -----------------------------------------------------
+            // 🚨 MODIFIED LOGIC: Insert Header, get ID, then insert Details
+            // -----------------------------------------------------
             try
             {
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
                     con.Open();
-                    string insertQuery = @"
-                INSERT INTO Transactions
-                (Date, TotalAmount, PaymentMethod, Customer, Status)
-                VALUES
-                (@date, @total, @payment, @customer, @status)";
 
-                    using (SqlCommand cmd = new SqlCommand(insertQuery, con))
+                    // 1. Insert into Transactions table and retrieve the new ID
+                    string insertHeaderQuery = @"
+                        INSERT INTO Transactions
+                        (Date, TotalAmount, PaymentMethod, Customer, Status)
+                        VALUES
+                        (@date, @total, @payment, @customer, @status);
+                        SELECT SCOPE_IDENTITY(); -- Retrieve the ID of the newly inserted row
+                    ";
+
+                    using (SqlCommand cmdHeader = new SqlCommand(insertHeaderQuery, con))
                     {
-                        cmd.Parameters.AddWithValue("@date", DateTime.Now);
-                        cmd.Parameters.AddWithValue("@total", totalAmount);
-                        cmd.Parameters.AddWithValue("@payment", paymentMethod);
-                        cmd.Parameters.AddWithValue("@customer", string.IsNullOrEmpty(customerName) ? DBNull.Value : (object)customerName);
-                        cmd.Parameters.AddWithValue("@status", "Completed");
+                        cmdHeader.Parameters.AddWithValue("@date", DateTime.Now);
+                        cmdHeader.Parameters.AddWithValue("@total", totalAmount);
+                        cmdHeader.Parameters.AddWithValue("@payment", paymentMethod);
+                        cmdHeader.Parameters.AddWithValue("@customer", string.IsNullOrEmpty(customerName) ? DBNull.Value : (object)customerName);
+                        cmdHeader.Parameters.AddWithValue("@status", "Completed");
 
-                        cmd.ExecuteNonQuery();
+                        // ExecuteScalar retrieves the single value (the new TransactionID)
+                        newTransactionId = Convert.ToInt32(cmdHeader.ExecuteScalar());
+                    }
+
+                    // 2. Insert into TransactionDetails table for each item in the cart
+                    string insertDetailQuery = @"
+                        INSERT INTO TransactionDetails 
+                        (TransactionID, ProductID, Quantity, Price)
+                        VALUES 
+                        (@transId, @prodId, @qty, @price)";
+
+                    foreach (var item in cart)
+                    {
+                        // First, get the ProductID from the Products table using the item name
+                        int productId;
+                        using (SqlCommand cmdGetId = new SqlCommand("SELECT ProductID FROM Products WHERE ProductName = @name", con))
+                        {
+                            cmdGetId.Parameters.AddWithValue("@name", item.item);
+                            object result = cmdGetId.ExecuteScalar();
+
+                            // Check for null or invalid result before conversion
+                            if (result == null || result == DBNull.Value)
+                            {
+                                throw new Exception($"Product ID not found for: {item.item}. Check the Products table data.");
+                            }
+                            productId = Convert.ToInt32(result);
+                        }
+
+                        // Now, insert the line item detail
+                        using (SqlCommand cmdDetail = new SqlCommand(insertDetailQuery, con))
+                        {
+                            cmdDetail.Parameters.AddWithValue("@transId", newTransactionId);
+                            cmdDetail.Parameters.AddWithValue("@prodId", productId);
+                            cmdDetail.Parameters.AddWithValue("@qty", item.qty);
+                            cmdDetail.Parameters.AddWithValue("@price", item.price);
+                            cmdDetail.ExecuteNonQuery();
+                        }
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error saving transaction: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error saving transaction details: " + ex.Message, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
+            // -----------------------------------------------------
+            // END MODIFIED LOGIC
+            // -----------------------------------------------------
+
 
             // Save receipt to desktop
             try
             {
                 StringBuilder receipt = new StringBuilder();
                 receipt.AppendLine("===== Cafe de Luna Receipt =====");
+                receipt.AppendLine($"Transaction ID: {newTransactionId}");
                 receipt.AppendLine($"Customer: {customerName}");
                 receipt.AppendLine($"Staff: {currentUser}");
                 receipt.AppendLine($"Date: {DateTime.Now}");
@@ -230,7 +280,7 @@ namespace POSCOFFEESYSTEM
                 receipt.AppendLine("Thank you for your purchase!");
 
                 string desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                string fileName = $"Receipt_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
+                string fileName = $"Receipt_{DateTime.Now:yyyyMMdd_HHmmss}_{newTransactionId}.txt";
                 File.WriteAllText(Path.Combine(desktop, fileName), receipt.ToString());
 
                 MessageBox.Show($"Receipt saved to Desktop as: {fileName}", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -239,7 +289,7 @@ namespace POSCOFFEESYSTEM
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error generating receipt: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error generating receipt file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -264,6 +314,21 @@ namespace POSCOFFEESYSTEM
             numericUpDown9.Value = 0;
 
             generatereceipt.Enabled = false;
+        }
+
+        private void richTextBoxOrderSummary_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label13_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label12_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

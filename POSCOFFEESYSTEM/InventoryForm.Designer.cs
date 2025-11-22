@@ -43,25 +43,25 @@ namespace POSCOFFEESYSTEM
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.ProductList = new System.Windows.Forms.DataGridView();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.Deletebtn = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
             this.ctegoryFilter = new System.Windows.Forms.ComboBox();
-            this.label5 = new System.Windows.Forms.Label();
             this.Restockbtn = new System.Windows.Forms.Button();
             this.Editbtn = new System.Windows.Forms.Button();
             this.Addbtn = new System.Windows.Forms.Button();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.txtID = new System.Windows.Forms.TextBox();
-            this.txtCategory = new System.Windows.Forms.TextBox();
             this.txtName = new System.Windows.Forms.TextBox();
-            this.Deletebtn = new System.Windows.Forms.Button();
             this.txtPrice = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.txtQuantity = new System.Windows.Forms.TextBox();
+            this.cmbCategory = new System.Windows.Forms.ComboBox();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -137,7 +137,6 @@ namespace POSCOFFEESYSTEM
             this.SearchBox.Name = "SearchBox";
             this.SearchBox.Size = new System.Drawing.Size(253, 20);
             this.SearchBox.TabIndex = 2;
-          
             // 
             // Searchbtn
             // 
@@ -185,7 +184,16 @@ namespace POSCOFFEESYSTEM
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(295, 513);
             this.panel2.TabIndex = 5;
-
+            // 
+            // Deletebtn
+            // 
+            this.Deletebtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(147)))), ((int)(((byte)(125)))));
+            this.Deletebtn.Location = new System.Drawing.Point(13, 319);
+            this.Deletebtn.Name = "Deletebtn";
+            this.Deletebtn.Size = new System.Drawing.Size(271, 58);
+            this.Deletebtn.TabIndex = 9;
+            this.Deletebtn.Text = "Delete Item";
+            this.Deletebtn.UseVisualStyleBackColor = false;
             // 
             // label6
             // 
@@ -196,7 +204,6 @@ namespace POSCOFFEESYSTEM
             this.label6.Size = new System.Drawing.Size(113, 16);
             this.label6.TabIndex = 8;
             this.label6.Text = "Category Filter:";
-
             // 
             // ctegoryFilter
             // 
@@ -206,17 +213,6 @@ namespace POSCOFFEESYSTEM
             this.ctegoryFilter.Size = new System.Drawing.Size(121, 21);
             this.ctegoryFilter.TabIndex = 7;
             this.ctegoryFilter.SelectedIndexChanged += new System.EventHandler(this.ctegoryFilter_SelectedIndexChanged);
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.Location = new System.Drawing.Point(709, 317);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(67, 16);
-            this.label5.TabIndex = 5;
-            this.label5.Text = "Quantity:";
-
             // 
             // Restockbtn
             // 
@@ -270,7 +266,16 @@ namespace POSCOFFEESYSTEM
             this.label4.Size = new System.Drawing.Size(107, 16);
             this.label4.TabIndex = 0;
             this.label4.Text = "Product Image";
-   
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Location = new System.Drawing.Point(709, 317);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(67, 16);
+            this.label5.TabIndex = 5;
+            this.label5.Text = "Quantity:";
             // 
             // openFileDialog1
             // 
@@ -283,29 +288,12 @@ namespace POSCOFFEESYSTEM
             this.txtID.Size = new System.Drawing.Size(253, 20);
             this.txtID.TabIndex = 6;
             // 
-            // txtCategory
-            // 
-            this.txtCategory.Location = new System.Drawing.Point(776, 262);
-            this.txtCategory.Name = "txtCategory";
-            this.txtCategory.Size = new System.Drawing.Size(253, 20);
-            this.txtCategory.TabIndex = 7;
-            // 
             // txtName
             // 
             this.txtName.Location = new System.Drawing.Point(776, 236);
             this.txtName.Name = "txtName";
             this.txtName.Size = new System.Drawing.Size(253, 20);
             this.txtName.TabIndex = 8;
-            // 
-            // Deletebtn
-            // 
-            this.Deletebtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(147)))), ((int)(((byte)(125)))));
-            this.Deletebtn.Location = new System.Drawing.Point(13, 319);
-            this.Deletebtn.Name = "Deletebtn";
-            this.Deletebtn.Size = new System.Drawing.Size(271, 58);
-            this.Deletebtn.TabIndex = 9;
-            this.Deletebtn.Text = "Delete Item";
-            this.Deletebtn.UseVisualStyleBackColor = false;
             // 
             // txtPrice
             // 
@@ -361,12 +349,22 @@ namespace POSCOFFEESYSTEM
             this.txtQuantity.Size = new System.Drawing.Size(253, 20);
             this.txtQuantity.TabIndex = 15;
             // 
+            // cmbCategory
+            // 
+            this.cmbCategory.FormattingEnabled = true;
+            this.cmbCategory.Location = new System.Drawing.Point(776, 262);
+            this.cmbCategory.Name = "cmbCategory";
+            this.cmbCategory.Size = new System.Drawing.Size(203, 21);
+            this.cmbCategory.TabIndex = 16;
+           
+            // 
             // InventoryForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(207)))), ((int)(((byte)(192)))));
             this.ClientSize = new System.Drawing.Size(1356, 622);
+            this.Controls.Add(this.cmbCategory);
             this.Controls.Add(this.txtQuantity);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.label7);
@@ -375,7 +373,6 @@ namespace POSCOFFEESYSTEM
             this.Controls.Add(this.label5);
             this.Controls.Add(this.txtPrice);
             this.Controls.Add(this.txtName);
-            this.Controls.Add(this.txtCategory);
             this.Controls.Add(this.txtID);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.groupBox1);
@@ -419,7 +416,16 @@ namespace POSCOFFEESYSTEM
                 // Populate the text fields with the selected product's details
                 txtID.Text = ProductList.Rows[e.RowIndex].Cells["ProductID"].Value?.ToString();
                 txtName.Text = ProductList.Rows[e.RowIndex].Cells["ProductName"].Value?.ToString();
-                txtCategory.Text = ProductList.Rows[e.RowIndex].Cells["Category"].Value?.ToString();
+                // Set the selected value of cmbCategory instead of txtCategory
+                var categoryValue = ProductList.Rows[e.RowIndex].Cells["Category"].Value?.ToString();
+                if (cmbCategory.Items.Contains(categoryValue))
+                {
+                    cmbCategory.SelectedItem = categoryValue;
+                }
+                else
+                {
+                    cmbCategory.SelectedIndex = -1;
+                }
                 txtPrice.Text = ProductList.Rows[e.RowIndex].Cells["Price"].Value?.ToString();
                 txtQuantity.Text = ProductList.Rows[e.RowIndex].Cells["Quantity"].Value?.ToString();
             }
@@ -458,7 +464,6 @@ namespace POSCOFFEESYSTEM
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.ComboBox ctegoryFilter;
         private System.Windows.Forms.TextBox txtID;
-        private System.Windows.Forms.TextBox txtCategory;
         private System.Windows.Forms.TextBox txtName;
         private System.Windows.Forms.Button Deletebtn;
         private System.Windows.Forms.TextBox txtPrice;
@@ -467,5 +472,6 @@ namespace POSCOFFEESYSTEM
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox txtQuantity;
+        private ComboBox cmbCategory;
     }
 }

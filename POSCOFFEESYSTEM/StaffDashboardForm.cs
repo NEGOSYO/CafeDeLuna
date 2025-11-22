@@ -23,7 +23,7 @@ namespace POSCOFFEESYSTEM
         }
 
         // ==========================
-        // LOAD DASHBOARD DATA
+        // LOAD DASHBOARD DATA (MODIFIED TO INCLUDE PRODUCTS)
         // ==========================
         private void LoadDashboardData()
         {
@@ -38,7 +38,7 @@ namespace POSCOFFEESYSTEM
                     "SELECT ISNULL(SUM(TotalAmount), 0) FROM Transactions WHERE CAST(Date AS DATE) = CAST(GETDATE() AS DATE)", con))
                 {
                     object result = cmdSales.ExecuteScalar();
-                    decimal todaySales = (result != DBNull.Value) ? Convert.ToDecimal(result) : 0;
+                    decimal todaySales = (result != DBNull.Value && result != null) ? Convert.ToDecimal(result) : 0;
                     lblTodaySales.Text = $"₱{todaySales:N2}";
                 }
 
@@ -56,17 +56,26 @@ namespace POSCOFFEESYSTEM
                     lblLowStock.Text = cmdLowStock.ExecuteScalar()?.ToString() ?? "0";
                 }
 
-                // ---------- SHOW RECENT TRANSACTIONS ----------
+                // 🚨 MODIFIED QUERY: Uses JOINs to include product details in the data grid
                 string queryTransactions = @"
-                    SELECT TOP 10
-                        TransactionID,
-                        Customer,
-                        Date,
-                        TotalAmount,
-                        PaymentMethod,
-                        Status
-                    FROM Transactions
-                    ORDER BY Date DESC";
+                    SELECT TOP 20
+                        T.TransactionID,
+                        T.Customer,
+                        T.Date,
+                        T.TotalAmount,
+                        T.PaymentMethod,
+                        T.Status,
+                        P.ProductName,       -- ⬅️ NEW: Product Name from Products table
+                        TD.Quantity,         -- ⬅️ NEW: Quantity bought from TransactionDetails
+                        TD.Price AS ItemPrice -- ⬅️ NEW: Item Price from TransactionDetails
+                    FROM 
+                        Transactions T
+                    INNER JOIN
+                        TransactionDetails TD ON T.TransactionID = TD.TransactionID
+                    INNER JOIN
+                        Products P ON TD.ProductID = P.ProductID
+                    ORDER BY 
+                        T.Date DESC, T.TransactionID, P.ProductName"; // Order by transaction, then product name to group items
 
                 using (SqlDataAdapter da = new SqlDataAdapter(queryTransactions, con))
                 {
